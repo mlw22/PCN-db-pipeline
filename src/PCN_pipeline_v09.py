@@ -124,9 +124,11 @@ def fetch_gbk(table_outfile, ftp_path_file):
     for ftp_path in ftp_paths:
         
         gbk_ftp_path = ftp_path + '/' + basename(ftp_path) + "_genomic.gbff.gz"
-        gbff_gz_fname = "../data/NCBI-reference-genomes/" + basename(ftp_path) + "_genomic.gbff.gz"
-        gbff_fname = "../data/NCBI-reference-genomes/" + basename(ftp_path) + "_genomic.gbff"
-        checksum_path = ftp_path + '/' + "md5checksums.txt"
+        gbff_gz_fname = "../Desktop/data/NCBI-reference-genomes/" + basename(ftp_path) + "_genomic.gbff.gz"
+        gbff_fname = "../Desktop/data/NCBI-reference-genomes/" + basename(ftp_path) + "_genomic.gbff"
+        checksum_file = ftp_path + '/' + "md5checksums.txt"
+        my_base_filename = basename(ftp_path) + "_genomic.gbff.gz"
+        md5_file_path = "../Desktop/data/NCBI-reference-genomes/" + my_base_filename + "_checksums.txt"
         
         if exists(gbff_fname):
             continue
@@ -136,6 +138,7 @@ def fetch_gbk(table_outfile, ftp_path_file):
         while gbk_not_fetched and gbk_fetch_attempts:
             try:
                 urllib.request.urlretrieve(gbk_ftp_path, filename=gbff_gz_fname)
+                urllib.request.urlretrieve(checksum_file, filename=md5_file_path)           
                 gbk_not_fetched = False  # assume success if the previous line worked,
                 gbk_fetch_attempts = 0  # and don't try again.
             except urllib.error.URLError:
@@ -144,27 +147,31 @@ def fetch_gbk(table_outfile, ftp_path_file):
                 if exists(gbff_gz_fname):
                     # delete the corrupted file if it exists.
                     os.remove(gbff_gz_fname)
-    parser = argparse.ArgumentParser(description="Run checksums for each file in directory.")
-    parser.add_argument('checksum_file', type=str, help='path to checksum file.')
-    args = parser.parse_args()
-    datadir = os.path.dirname(args.checksum_path)
+                            
     
-    with open(args.checksum_path, "r") as checksum_fh:
-        for line in checksum_fh:
-            line = line.strip()
-            my_base_filename, my_checksum = line.split()
-            my_file_path = os.path.join(datadir, my_base_filename)
-            ## run md5 on my_file_path, using the directory for the checksum file,
-            ## and get the output.
-            md5_call = subprocess.run(["md5sum", gbff_gz_fname], capture_output=True, text=True)
+        with open(md5_file_path, "r") as checksum_fh:
+            target_string = "_genomic.gbff.gz"
+            for line in checksum_fh:
+                if target_string in line:
+                    isolated_line = line.strip()
+            
+                    my_checksum, my_base_filename = isolated_line.split()
+                    my_checksum_ncbi = my_checksum.split("./")[0].strip()
+                    print(my_checksum_ncbi)
+            
+            # run md5 on my_file_path, using the directory for the checksum file,
+            # and get the output.
+            md5_call = subprocess.run(["md5", gbff_gz_fname], capture_output=True, text=True)
             my_md5_checksum = md5_call.stdout.split("=")[-1].strip()
+            print(my_md5_checksum)
             ## verify that the checksums match.
-            if (my_md5_checksum == my_checksum):
-                print(my_md5_checksum, "matches", my_checksum)
+            if (my_md5_checksum == my_checksum_ncbi):
+                print(my_md5_checksum, "matches", my_checksum_ncbi)
             else:
-                error_message = "ERROR: " + my_md5_checksum + " does not match " + my_checksum + " for file " + my_file_path
+                error_message = "ERROR: " + my_md5_checksum + " does not match " + my_checksum_ncbi + " for file " + gbff_gz_fname
                 raise AssertionError(error_message)
-    return   
+    return
+ 
         
 
 def create_genome_metadatacsv(ftp_file, table_outfile, genome_metadatacsv):
