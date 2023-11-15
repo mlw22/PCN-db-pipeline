@@ -13,7 +13,7 @@
 #### The next three functions parse through the SRA and reference genomes using kallisto and create files for the three kallisto folders in results.
 #### Lastly the final tables of results are created as "chromosome_plasmid_copy_numbers.csv", "ARG_copy_numbers.csv", and "replicon_lengths.csv".
 
-### How to run on DCC:
+## How to run on DCC:
 #### To run on DCC, in your conda environment install bioconda, kallisto, ncbi-datasets-cli and pysradb: 
 ##### conda install -c bioconda kallisto
 ##### conda install -c conda-forge ncbi-datasets-cli
@@ -21,3 +21,6 @@
 #### You will then need to download the SRA-Toolkit module that is available on DCC:
 ##### module load SRA-Toolkit
 
+### This will take ~2 weeks to run on DCC.
+### sbatch --mem=16G -t 430:00:00 --wrap="PCN_pipeline_v09.py"
+#### Use .../work, as multiple terabytes will be downloaded.
