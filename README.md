@@ -1,7 +1,7 @@
 # PCN-db-pipeline
 ## Requirements: biopython, kallisto, SRA-Toolkit, pysradb, and ncbi-datasets-cli
 
-### This program can either be run on your Desktop or Duke Compute Cluster (DCC). DCC is suggested to use due to the large amount of data that is downloaded from the thousands of samples. 
+### This program can either be run locally or on Duke Compute Cluster (DCC). DCC is suggested to use due to the large amount of data that is downloaded from the thousands of samples. 
 
 ### Make a top-level directory with three directories inside, named "data", "results", and "src". Now copy all source code files in this repository into "src".
 
